@@ -1,0 +1,141 @@
+---
+title: "Exploratory Data Analysis - Week 1 Assignment"
+author: "PGM"
+date: "26/10/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+rm(list=ls())
+
+# Store current directory
+currentwd <- getwd()
+
+# Switch to the directory corresponding to the assignment
+directory <- file.path(currentwd, "Desktop/Johns Hopkins/ExData_Plotting1-master")
+setwd(directory)
+```
+
+## Peer-graded Assignment: Course Project 1
+
+This assignment uses data from the UC Irvine Machine Learning Repository, a popular repository for machine learning datasets. In particular, we will be using the “Individual household electric power consumption Data Set” which I have made available on the course web site:
+
+Dataset: Electric power consumption [20Mb]
+
+Description: Measurements of electric power consumption in one household with a one-minute sampling rate over a period of almost 4 years. Different electrical quantities and some sub-metering values are available.
+
+The following descriptions of the 9 variables in the dataset are taken from the UCI web site:
+
+- Date: Date in format dd/mm/yyyy
+- Time: time in format hh:mm:ss
+- Global_active_power: household global minute-averaged active power (in kilowatt)
+- Global_reactive_power: household global minute-averaged reactive power (in kilowatt)
+- Voltage: minute-averaged voltage (in volt)
+- Global_intensity: household global minute-averaged current intensity (in ampere)
+- Sub_metering_1: energy sub-metering No. 1 (in watt-hour of active energy). It corresponds to the kitchen, containing mainly a dishwasher, an oven and a microwave (hot plates are not electric but gas powered).
+- Sub_metering_2: energy sub-metering No. 2 (in watt-hour of active energy). It corresponds to the laundry room, containing a washing-machine, a tumble-drier, a refrigerator and a light.
+- Sub_metering_3: energy sub-metering No. 3 (in watt-hour of active energy). It corresponds to an electric water-heater and an air-conditioner.
+
+## Loading the data
+
+When loading the dataset into R, please consider the following:
+
+- The dataset has 2,075,259 rows and 9 columns. First calculate a rough estimate of how much memory the dataset will require in memory before reading into R. Make sure your computer has enough memory (most modern computers should be fine).
+
+- We will only be using data from the dates 2007-02-01 and 2007-02-02. One alternative is to read the data from just those dates rather than reading in the entire dataset and subsetting to those dates.
+
+- You may find it useful to convert the Date and Time variables to Date/Time classes in R using the 𝚜𝚝𝚛𝚙𝚝𝚒𝚖𝚎()  and 𝚊𝚜.𝙳𝚊𝚝𝚎() functions.
+
+- Note that in this dataset missing values are coded as ?.
+
+```{r}
+# Read file
+power_consumption_data <- read.table("household_power_consumption.txt", header = TRUE, sep = ";", stringsAsFactors = FALSE)
+power_consumption_data <- subset(power_consumption_data, Date == "1/2/2007" | Date == "2/2/2007")
+
+# Quick look at the data
+str(power_consumption_data)
+```
+
+```{r}
+# Convert Date and Time variables to Date/Time classes
+power_consumption_data$Date_Time <- paste(power_consumption_data$Date, power_consumption_data$Time)
+power_consumption_data$Date_Time <- strptime(power_consumption_data$Date_Time, format = "%d/%m/%Y %H:%M:%S")
+
+# Convert other columns to numeric class
+power_consumption_data$Global_active_power <- as.numeric(power_consumption_data$Global_active_power)
+power_consumption_data$Sub_metering_1 <- as.numeric(power_consumption_data$Sub_metering_1)
+power_consumption_data$Sub_metering_2 <- as.numeric(power_consumption_data$Sub_metering_2)
+power_consumption_data$Sub_metering_3 <- as.numeric(power_consumption_data$Sub_metering_3)
+power_consumption_data$Voltage <- as.numeric(power_consumption_data$Voltage)
+power_consumption_data$Global_reactive_power <- as.numeric(power_consumption_data$Global_reactive_power)
+power_consumption_data$Global_intensity <- as.numeric(power_consumption_data$Global_intensity)
+
+str(power_consumption_data)
+```
+
+```{r}
+# Creating of Plot1.png
+png(file = "Plot1.png", width = 480, height = 480, units = 'px', bg="transparent")
+hist(power_consumption_data$Global_active_power, col = "red", 
+     xlab = "Global Active Power (kilowatts)", main = "Global Active Power")
+dev.off()
+```
+
+```{r}
+# Creating of Plot2.png
+png(file = "Plot2.png", width = 480, height = 480, units = 'px', bg="transparent")
+plot(power_consumption_data$Date_Time, power_consumption_data$Global_active_power, type = 'l',
+     xlab = "", ylab = "Global Active Power (kilowatts)")
+
+dev.off()
+```
+
+```{r}
+# Creating of Plot3.png
+png(file = "Plot3.png", width = 480, height = 480, units = 'px', bg="transparent")
+with(power_consumption_data, plot(Date_Time, Sub_metering_1, type = 'l',
+     xlab = "", ylab = "Energy sub metering"))
+with(power_consumption_data, lines(Date_Time, Sub_metering_2, col = "red"))
+with(power_consumption_data, lines(Date_Time, Sub_metering_3, col = "blue"))
+legend("topright", c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"), 
+       col = c("black", "red", "blue"), lty = 1)
+
+dev.off()
+```
+
+```{r}
+# Creating of Plot4.png
+png(file = "Plot4.png", width = 480, height = 480, units = 'px', bg="transparent")
+
+# 2x2 matrix of plots
+par(mfrow=c(2,2))
+
+# Top left plot
+par(mfg=c(1,1))
+plot(power_consumption_data$Date_Time, power_consumption_data$Global_active_power, type = 'l',
+     xlab = "", ylab = "Global Active Power")
+
+# Bottom left plot
+par(mfg=c(2,1))
+with(power_consumption_data, plot(Date_Time, Sub_metering_1, type = 'l',
+     xlab = "", ylab = "Energy sub metering"))
+with(power_consumption_data, lines(Date_Time, Sub_metering_2, col = "red"))
+with(power_consumption_data, lines(Date_Time, Sub_metering_3, col = "blue"))
+legend("topright", c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"), 
+       col = c("black", "red", "blue"), lty = 1, bty = "n")
+
+# Top right plot
+par(mfg=c(1,2))
+with(power_consumption_data, plot(Date_Time, Voltage, type = 'l',
+     xlab = "datetime", ylab = "Voltage"))
+
+# Bottom right plot
+par(mfg=c(2,2))
+with(power_consumption_data, plot(Date_Time, Global_reactive_power, type = 'l',
+     xlab = "datetime", ylab = "Global_reactive_power"))
+
+dev.off()
+```
